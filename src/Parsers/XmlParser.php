@@ -14,14 +14,20 @@ class XmlParser extends Parser
     private function objectify($value)
     {
         $temp = is_string($value) ?
-        simplexml_load_string($value, 'SimpleXMLElement', LIBXML_NOCDATA) :
-        $value;
+            simplexml_load_string($value, 'SimpleXMLElement', LIBXML_NOCDATA) :
+            $value;
 
         $result = [];
 
         foreach ((array) $temp as $key => $value) {
             if ($key === "@attributes") {
-                $result['_' . key($value)] = $value[key($value)];
+                if (is_array($value)) {
+                    foreach($value as $attributeKey => $attribute) {
+                        $result['_' . $attributeKey] = $value[$attributeKey];
+                    }
+                } else {
+                    $result['_' . key($value)] = $value[key($value)];
+                }
             } elseif (is_array($value) && count($value) < 1) {
                 $result[$key] = '';
             } else {
